@@ -9,7 +9,6 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     slug = models.SlugField(db_index=True, blank=True, max_length=250)
     title = models.CharField(max_length=250)
-    author_img = models.CharField(max_length=50)
     views = models.IntegerField(default=0)
     date = models.DateTimeField(default=timezone.now())
     content = models.TextField()

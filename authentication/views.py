@@ -1,64 +1,36 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import login, logout, authenticate
+from .models import User
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from .serializers import UserSerializer, UserInfoSerializer
+from rest_framework.authtoken.models import Token
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 
-
-
 @api_view(["POST"])    
 def signup(req):
-    error = False
-    if req.method == 'POST':
-        form = SignupForm(req.POST)
-        if form.is_valid():
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+    #try:
+        serializer = UserSerializer(data=req.data)
+        if serializer.is_valid():
+            serializer.save()
+            user = User.objects.get(username=req.data['username'])
+            user.set_password(req.data['password'])
+            user.save()
+            token = Token.objects.create(user=user)
+            return Response({'token': token.key, 'user': serializer.data})
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    #except:
+        return Response(status=HTTP_400_BAD_REQUEST)
             
-            try:
-                User.objects.create_user(first_name=first_name, last_name=last_name, username=email, email=email, password=password)
-                return HttpResponseRedirect("/")
-            except:
-                error = True
-                pass
-        else:
-            pass
-            
-
-    return  render(req, "blog/signup.html", {
-        "form": form,
-        "hasError": error
-    })
     
-    
-@api_view(["POST"])    
-def login_view(req):     
-    try:    
-        email = req.body.email
-        password = req.body.password    
-        user = authenticate(username=email, password=password)
-        print(user)
-        if user == None:
-            return render(req, "blog/login.html", {
-                "form": form,
-                "error": "Wrong Email or Password"
-            })
-        else:
-            login(req, user)
-    except:
-        return render(req, "blog/login.html", {
-            "form": form,
-            "error": "Wrong Email or Password"
-        })
-                
-    return render(req, "blog/login.html", {
-        "form": form,
-    })
-
-@api_view(["GET"])    
-def logout_view(req): 
-    logout(req)
-    return HttpResponseRedirect("/")
+@api_view(['POST'])
+def login(request):
+    user = get_object_or_404(User, username=request.data['username'])
+    if not user.check_password(request.data['password']):
+        return Response("missing user", status=HTTP_404_NOT_FOUND)
+    token, created = Token.objects.get_or_create(user=user)
+    serializer = UserInfoSerializer(user)
+    return Response({'token': token.key, 'user': serializer.data})
