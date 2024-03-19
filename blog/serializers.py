@@ -1,14 +1,11 @@
 from rest_framework import serializers
 from .models import Post
+from authentication.serializers import UserInfoSerializer
 
 class PostSerializers(serializers.ModelSerializer):
     
-    # author = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name="author"
-    # )
-    
+    author = UserInfoSerializer(many=False, read_only=True)
     class Meta:
         model = Post
-        fields = ["author", "slug", "title", "views", "date", "content"]
+        fields = "__all__"
         

@@ -29,12 +29,12 @@ def top(req):
     return Response(PostSerializers(top_posts, many=True).data, status=HTTP_200_OK)
 
 
-def view(req, slug):
-    
-    current_post = Post.objects.get(slug= slug)
-    
+
+@api_view(["GET"])
+def post(req, slug):
+    current_post = Post.objects.get(slug=slug)
     Post.objects.filter(slug= slug).update(views=F('views') + 1)
-    
-    return Response(PostSerializers(current_post), status=HTTP_201_CREATED)
+    return Response(PostSerializers(current_post).data, status=HTTP_200_OK)
+
 
    
