@@ -22,5 +22,6 @@ ENDPOINT = "api/v1/"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(ENDPOINT + "auth/", include("authentication.urls")),
-    path(ENDPOINT + "posts/", include("blog.urls"))
+    path(ENDPOINT + "posts/", include("blog.urls")),
+    path(ENDPOINT + "user/", include("user.urls")),
 ]
