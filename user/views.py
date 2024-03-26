@@ -4,8 +4,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
-from blog.serializers import PostSerializers
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_201_CREATED
+from blog.serializers import PostSerializers, PostCreationSerializers
 from authentication.models import User
 from authentication.serializers import UserInfoSerializer
 
@@ -30,23 +30,21 @@ def my_post(req):
 @permission_classes([IsAuthenticated])
 def create_post(req):
     author =  req.user
-    title = req.POST['title']
-    content = req.POST['content']
-    new_post = Post(author=author, title=title, content=content)
-    new_post.save()
-    return Response(PostSerializers(new_post).data, status=HTTP_201_CREATED)
-
-
+    data = PostCreationSerializers(data=req.data)
+    if data.is_valid():
+        new_post = Post(author=author, title=data.data['title'], content=data.data['content'])
+        new_post.save()
+        return Response(PostSerializers(new_post).data, status=HTTP_201_CREATED)
+    else:
+        return Response(status=HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_profile(req):
-    
-    pass
-    
-    #user =  User.objects.get(id= req.user.id)
+    user =  User.objects.get(id= req.user.id)
+    return Response(UserInfoSerializer(user).data, status=HTTP_200_OK)
     
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

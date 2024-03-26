@@ -9,3 +9,11 @@ class PostSerializers(serializers.ModelSerializer):
         model = Post
         fields = "__all__"
         
+
+class PostCreationSerializers(serializers.ModelSerializer):
+    
+    # author = UserInfoSerializer(many=False, read_only=True)
+    class Meta:
+        model = Post
+        fields = ["title","content"]
+        
