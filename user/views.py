@@ -33,9 +33,7 @@ def create_post(req):
     title = req.POST['title']
     content = req.POST['content']
     new_post = Post(author=author, title=title, content=content)
-    
     new_post.save()
-    
     return Response(PostSerializers(new_post).data, status=HTTP_201_CREATED)
 
 
@@ -55,7 +53,6 @@ def my_profile(req):
 @permission_classes([IsAuthenticated])
 def upload_profile_img(req):
     user = User.objects.get(id=req.user.id)
-    print(req.FILES['profile-img'])
     user.profile_img = req.FILES['profile-img']
     user.save()
     return Response(UserInfoSerializer(user).data, status=HTTP_200_OK)
